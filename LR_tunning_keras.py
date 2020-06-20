@@ -2,7 +2,7 @@
 import pandas as pd
 import numpy as np
 import time
-from tensorflow import keras
+from tensorflow import keras,random
 from tensorflow.keras import layers
 from sklearn.experimental import enable_iterative_imputer
 from sklearn.impute import SimpleImputer,IterativeImputer
@@ -10,6 +10,7 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.model_selection import train_test_split
 from sklearn.utils import shuffle
 # To see how much it takes to run
+random.set_seed(7)
 w_start=time.time()
 class importData:
     def __init__(self,path):
@@ -47,11 +48,11 @@ def create_baseline(n,layers_dims,ol,dp1,dp2):
     model = keras.Sequential(name='Mymodel1')
     #Building the structure
     model.add(layers.InputLayer(n))
-    model.add(layers.Dense(layers_dims[0], activation='relu', kernel_initializer=keras.initializers.he_normal(seed=0)))
+    model.add(layers.Dense(layers_dims[0], activation='relu', kernel_initializer=keras.initializers.he_normal()))
     model.add(layers.Dropout(dp1))
-    model.add(layers.Dense(layers_dims[1], activation='relu', kernel_initializer=keras.initializers.he_normal(seed=0)))
+    model.add(layers.Dense(layers_dims[1], activation='relu', kernel_initializer=keras.initializers.he_normal()))
     model.add(layers.Dropout(dp2))
-    model.add(layers.Dense(layers_dims[2], activation='relu', kernel_initializer=keras.initializers.he_normal(seed=0)))
+    model.add(layers.Dense(layers_dims[2], activation='relu', kernel_initializer=keras.initializers.he_normal()))
     model.add(layers.Dense(ol, activation='sigmoid'))
     return model
 #Defining Hyperparameters
@@ -67,7 +68,7 @@ def tune_lr(model,lr_iter=100):
         r = -3+1.60206*np.random.rand()
         lr= 10**r
         model.compile(optimizer=keras.optimizers.Adam(learning_rate=lr), loss=keras.losses.BinaryCrossentropy(), metrics=[keras.metrics.BinaryAccuracy()])
-        h = model.fit(X_train,Y_train,epochs=800,batch_size=64,validation_data=(X_test,Y_test),verbose=0)
+        h = model.fit(X_train,Y_train,epochs=800,batch_size=64,validation_data=(X_test,Y_test),verbose=0,shuffle=False)
         cv_accuracy.append(h.history["val_binary_accuracy"][-1])
         lr_list.append(lr)
         train_accuracy.append(h.history["binary_accuracy"][-1])
@@ -87,7 +88,7 @@ print ('The training accuracy for that value is: '+str(train_accuracy[idx]*100)+
 #Save results to manually check
 a = np.column_stack(([lr_list,cv_accuracy,train_accuracy]))
 df = pd.DataFrame(a)
-df.to_csv('Run_001_04.csv',header=False,index=False)
+df.to_csv('fourthRun_001_04.csv',header=False,index=False)
 w_end=time.time()
 tt =(w_end - w_start)/60
 print('\nRunning time of the whole code is: %.2f minutes' %tt)
